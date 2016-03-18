@@ -4,7 +4,7 @@ Validation module
 
 Use like this:
 
-`
+```
     var formValidation = new FormValidate([
         new FieldValidate({
             el: '#product_name',
@@ -26,4 +26,4 @@ Use like this:
     s('#send-form-button').click(function () {
         return formValidation.validate();
     });
-`
+```
