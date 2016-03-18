@@ -66,7 +66,7 @@ In this example:
 
 * __el__ - [required] Selector to field, can be string or s() element
 * __insertTo__ - Selector to field which can dysplay error message, can be string or s() element
-* __styleList__ - Prefix whcih will instet to message text
+* __styleList__ - Prefix whcih will instet to message text(default: '')
 
 But there can be a lot of options:
 
@@ -92,7 +92,125 @@ Will add such classes to field: <input ... class="class-error-field-required cla
  
  __MODE_SHOW_ERROR_BLOCK_PARENT__ - Change classes in parent block 
 
+##Crate custom validator
+There very easy to create new validator. It can be class __validator__ or __alias__
 
+For create new validator just create class with __export__ and __validate__ methods
+ __export__ method will return object which will be added to main field object
+ __validate__ method which validate field with custom login
+ 
+ Constructor of class can receive field object
+ 
+ There is simple required validator:
+ 
+``` 
+ /**
+ * Required validator
+ */
+var RequiredValidator = (function () {
+
+    /**
+     * Init class
+     * @param field
+     */
+    var constructor = function (field) {
+
+        // Required type default values
+        this.id = 'required';
+        this.defaultRequiredMessage = 'Field have to be filled';
+        this.field = field;
+    };
+
+    var self = constructor.prototype;
+
+    /**
+     * Export data into field
+     */
+    self.export = function () {
+        var validatorInstance = this;
+
+        return {
+
+            /**
+             * Required validation
+             * @param errorMessage
+             * @returns {FieldValidate}
+             */
+            required: function (errorMessage) {
+
+                validatorInstance.defaultRequiredMessage = errorMessage || validatorInstance.defaultRequiredMessage;
+                this.reservedValidators.push(validatorInstance.id);
+                return this;
+            }
+        }
+    };
+
+    /**
+     * Validate validator
+     */
+    self.validate = function () {
+
+        if (this.field._getFieldValue() == '') {
+            this.field.addError(this.id, this.defaultRequiredMessage);
+            this.field.valid = false;
+        } else {
+            this.field.removeError(this.id);
+            this.field.valid = true;
+        }
+    };
+
+    return constructor;
+})();
+```
+
+You need add your validator to register validator array
+
+```
+// Register all used validators
+this.registerValidator = [
+    new RequiredValidator(this)
+];
+```
+
+__required__ method will be added to field instance and can be access as
+``` new FieldValidator(...).required() ```
+and such validator can be added
+
+###And you can use alias validator
+
+There is when you need override some default values form another class validator and save it as new validator.
+
+For example lets create __url__ validator which use regExp validator
+
+```
+/**
+ * Url regexp validator
+ */
+var UrlValidator = {
+
+    export: function () {
+        return {
+
+            /**
+             * Url validation
+             * @param errorMessage
+             * @returns {FieldValidate}
+             */
+            url: function (errorMessage) {
+                var msg = errorMessage || 'Field should be a url',
+                    urlPattern = /^(https?:\/\/)?[\w]*\.[\w\-\&\#\=\/\.?\(\)]*$/;
+
+                this.regExp(urlPattern, msg);
+                return this;
+            }
+        }
+    }
+};
+```
+
+As you can see there is only one methond in object which return new object which will be used for extending
+
+####But You should not use this validator with regExp
 
 ##Contributing
 Feel free to fork and create pull requests at any time.
