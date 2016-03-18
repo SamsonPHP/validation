@@ -1,17 +1,17 @@
 # SamsonPHP validation module
-
+ 
 SamsonPHP validation implementation
 
 [![Latest Stable Version](https://poser.pugx.org/SamsonPHP/validation/v/stable.svg)](https://packagist.org/packages/SamsonPHP/validation)
 [![Build Status](https://scrutinizer-ci.com/g/SamsonPHP/validation/badges/build.png?b=master)](https://scrutinizer-ci.com/g/SamsonPHP/validation/build-status/master)
 [![Code Coverage](https://scrutinizer-ci.com/g/SamsonPHP/validation/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/SamsonPHP/validation/?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/SamsonPHP/validation/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/SamsonPHP/validation/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/SamsonPHP/validation/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/SamsonPHP/validation/?branch=master) 
 [![Total Downloads](https://poser.pugx.org/SamsonPHP/validation/downloads.svg)](https://packagist.org/packages/SamsonPHP/validation)
 [![Stories in Ready](https://badge.waffle.io/SamsonPHP/validation.png?label=ready&title=Ready)](https://waffle.io/SamsonPHP/validation)
 
 ##Documentation
 Follow [official documentation](http://github.com/SamsonPHP/validation/blob/master/docs/Index.md).
-
+ 
 ##Installation
 You can install this package through Composer:
 ```composer require SamsonPHP/validation```
@@ -53,5 +53,5 @@ If you discover any security related issues, please use this repository issue tr
 
 ##License
 Open Software License ("OSL") v 3.0. Please see License File for more information.
-
+ 
 [SamsonOS](http://samsonos.com)
