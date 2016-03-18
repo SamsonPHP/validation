@@ -5,39 +5,59 @@
 /**
  * Required validator
  */
-var RequiredValidator = {
-
-    // Required type default values
-    idRequired: 'required',
-    defaultRequiredMessage: 'Field have to be filled',
+var RequiredValidator = (function () {
 
     /**
-     * Required validation
-     * @param errorMessage
-     * @returns {FieldValidate}
+     * Init class
+     * @param field
      */
-    required: function (errorMessage) {
+    var constructor = function (field) {
 
-        this.defaultRequiredMessage = errorMessage || this.defaultRequiredMessage;
-        this.reservedValidators.push(this.idRequired);
-        return this;
-    },
+        // Required type default values
+        this.id = 'required';
+        this.defaultRequiredMessage = 'Field have to be filled';
+        this.field = field;
+    };
+
+    var self = constructor.prototype;
 
     /**
-     * Validate
-     * @returns {RequiredValidator}
-     * @private
+     * Export data into field
      */
-    _required: function () {
+    self.export = function () {
+        var validatorInstance = this;
 
-        if (this._getFieldValue() == '') {
-            this.addError(this.idRequired, this.defaultRequiredMessage);
-            this.valid = false;
-        } else {
-            this.removeError(this.idRequired);
-            this.valid = true;
+        return {
+
+            /**
+             * Required validation
+             * @param errorMessage
+             * @returns {FieldValidate}
+             */
+            required: function (errorMessage) {
+
+                validatorInstance.defaultRequiredMessage = errorMessage || validatorInstance.defaultRequiredMessage;
+                this.reservedValidators.push(validatorInstance.id);
+                return this;
+            }
         }
+    };
 
-        return this;
-    }
-};
+    /**
+     * Validate validator
+     */
+    self.validate = function () {
+
+        console.log('fd');
+
+        if (this.field._getFieldValue() == '') {
+            this.field.addError(this.id, this.defaultRequiredMessage);
+            this.field.valid = false;
+        } else {
+            this.field.removeError(this.id);
+            this.field.valid = true;
+        }
+    };
+
+    return constructor;
+})();
