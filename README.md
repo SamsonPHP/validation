@@ -22,27 +22,27 @@ The packages adheres to the SemVer specification, and there will be full backwar
 
 ##Usage example
 ```
-    var formValidation = new FormValidate([
-        new FieldValidate({
-            el: '#product_name',
-            insertTo: '.error-wrapper',
-            styleList: '*'
-        }).required().length(),
-        new FieldValidate({
-            el: '#product_description',
-            insertTo: '.error-wrapper',
-            styleList: '*'
-        }).required(),
-        new FieldValidate({
-            el: '#product_usp',
-            insertTo: '.error-wrapper',
-            styleList: '*'
-        }).required()
-    ]);
+var formValidation = new FormValidate([
+    new FieldValidate({
+        el: '#product_name',
+        insertTo: '.error-wrapper',
+        styleList: '*'
+    }).required().length(),
+    new FieldValidate({
+        el: '#product_description',
+        insertTo: '.error-wrapper',
+        styleList: '*'
+    }).required(),
+    new FieldValidate({
+        el: '#product_usp',
+        insertTo: '.error-wrapper',
+        styleList: '*'
+    }).required()
+]);
 
-    s('#send-form-button').click(function () {
-        return formValidation.validate();
-    });
+s('#send-form-button').click(function () {
+    return formValidation.validate();
+});
 ```
 
 ##Contributing
