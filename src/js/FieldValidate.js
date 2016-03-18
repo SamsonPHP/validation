@@ -22,12 +22,19 @@ var FieldValidate = (function () {
          * Extend validator
          */
         // Register all used validators
-        this.registerValidator = [RequiredValidator, LengthValidator];
+        this.registerValidator = [
+            new RequiredValidator(this),
+            new LengthValidator(this),
+            new RegExpValidator(this),
+            UrlValidator
+        ];
+
         // Extend validators
         this._extendValidator();
 
         /**
          * Override parameters
+         * TODO Add login to extend default values
          */
         // Main DOM element
         this.el = typeof options.el == 'string' ? s(options.el) : options.el;
@@ -37,8 +44,10 @@ var FieldValidate = (function () {
         this.trim = options.trim || true;
         // Trim value
         this.fieldErrorClass = options.fieldErrorClass || ['class-error-field-', 'class-error-field'];
-        // If need show error block with message
-        this.showErrorBlock = options.showErrorBlock || true;
+        // If need show error block with message (default value is: if insert to element exists)
+        this.showErrorBlock = options.showErrorBlock || (options.insertTo != null);
+        // Which element will be changed his class as error
+        this.showErrorBlockType = options.showErrorBlockType || constructor.MODE_SHOW_ERROR_BLOCK_DEFAULT;
         // Resolve insert to options
         this._resolveInsetToOption(options);
 
@@ -49,8 +58,6 @@ var FieldValidate = (function () {
         this.errorBlockClassPrefix = 'class-error-';
         // Class of item error block
         this.errorBlockItemClassPrefix = 'class-error-item-';
-        // Prefix to validate method of reserved validator
-        this.validatorIdPrefix = '_';
         // Class depending of field name
         this.class = this.errorBlockClassPrefix + this.el.a('name');
         // Array of set validators
@@ -59,6 +66,18 @@ var FieldValidate = (function () {
         this.valid = true;
 
     }, self = constructor.prototype;
+
+    /**
+     * Default element set class
+     * @type {number}
+     */
+    constructor.MODE_SHOW_ERROR_BLOCK_DEFAULT = 1;
+
+    /**
+     * Set namespace of target element which will change his class as parent of target field
+     * @type {number}
+     */
+    constructor.MODE_SHOW_ERROR_BLOCK_PARENT = 2;
 
     /**
      * Set namespace as parent of target element
@@ -89,12 +108,15 @@ var FieldValidate = (function () {
      * @returns {boolean}
      */
     self.validate = function () {
+        var validatorInstance;
 
         // Iterate all reserved validator and call their validate methods
-        this.reservedValidators.forEach(function(validator) {
-            var checkValue = this[this.validatorIdPrefix + validator];
-            if (typeof checkValue === 'function') {
-                checkValue.call(this);
+        this.reservedValidators.forEach(function(id) {
+            // Find validator
+            validatorInstance = this._findValidatorById(id);
+            if (typeof validatorInstance.validate === 'function') {
+                // Validate
+                validatorInstance.validate();
             }
         }.bind(this));
 
@@ -124,8 +146,8 @@ var FieldValidate = (function () {
             }
         }
 
-        // Remove field class
-        this._removeFieldClass(id);
+        // Show field class
+        this._toggleFieldClass(id, false);
     };
 
     /**
@@ -142,7 +164,7 @@ var FieldValidate = (function () {
         }
 
         // Show field class
-        this._addFieldClass(id);
+        this._toggleFieldClass(id, true);
     };
 
     /**
@@ -159,79 +181,96 @@ var FieldValidate = (function () {
     };
 
     /**
-     * Get right insert to elemnt
+     * Find global validator by id
+     * @param id
+     * @returns {*}
+     * @private
+     */
+    self._findValidatorById = function (id) {
+        var result;
+        this.registerValidator.forEach(function (validator) {
+            if (validator.id != null && validator.id === id) {
+                result = validator;
+            }
+        });
+
+        if (result == null) {
+            throw new Error("Validator not found");
+        }
+
+        return result;
+    };
+
+    /**
+     * Get right insert to element
      * @param options
      */
     self._resolveInsetToOption = function (options) {
 
-        // Get insert to element
-        var insertToElement = typeof options.insertTo === 'string' ? s(options.insertTo) : options.insertTo;
+        // If inset to element is exists
+        if (options.insertTo) {
 
-        // Resolve type
-        this.insertToType = options.insertToType || constructor.MODE_INSERT_TO_PARENT;
+            // Get insert to element
+            var insertToElement = typeof options.insertTo === 'string' ? s(options.insertTo) : options.insertTo;
 
-        // Set insert to element by mode
-        switch (this.insertToType) {
+            // Resolve type
+            this.insertToType = options.insertToType || constructor.MODE_INSERT_TO_PARENT;
 
-            // Element insert to with default parent
-            case constructor.MODE_INSERT_TO_DEFAULT:
-                // Insert to passed element or to parent of input
-                this.insertTo = insertToElement;
-                break;
+            // Set insert to element by mode
+            switch (this.insertToType) {
 
-            // Element insert to as sibling to field element
-            case constructor.MODE_INSERT_TO_PARENT:
-                //console.log(this.el.parent());
-                this.insertTo = s(insertToElement.selector, this.el.parent());
-                break;
-        }
-    };
+                // Element insert to with default parent
+                case constructor.MODE_INSERT_TO_DEFAULT:
+                    // Insert to passed element or to parent of input
+                    this.insertTo = insertToElement;
+                    break;
 
-    /**
-     * Add class to field
-     * @private
-     */
-    self._addFieldClass = function (id) {
-        var isFirst = true;
-
-        console.log('sdf');
-        // Add passed custom class
-        if (this.fieldErrorClass) {
-            if (Array.isArray(this.fieldErrorClass)) {
-                this.fieldErrorClass.forEach(function (klass) {
-                    if (isFirst) {
-                        this.el.addClass(klass + id);
-                        isFirst = false;
-                    } else {
-                        this.el.addClass(klass);
-                    }
-                }.bind(this));
-            } else {
-                this.el.addClass(this.fieldErrorClass);
+                // Element insert to as sibling to field element
+                case constructor.MODE_INSERT_TO_PARENT:
+                    this.insertTo = s(insertToElement.selector, this.el.parent());
+                    break;
             }
         }
     };
 
     /**
-     * Remove field class
+     * Toggle class to field
      * @private
      */
-    self._removeFieldClass = function (id) {
-        var isFirst = true;
+    self._toggleFieldClass = function (id, addClass) {
+        var isFirst = true,
+            targetElement = this.el,
+            mode = addClass ? 'addClass' : 'removeClass';
+
+        // When need attach classes to parent of input
+        if (this.showErrorBlockType === constructor.MODE_SHOW_ERROR_BLOCK_PARENT) {
+            targetElement = targetElement.parent();
+        }
+
+        // If need work globally not with particular validator
+        if (id == null) {
+            this.reservedValidators.forEach(function(validator) {
+                if (typeof validator.id !== 'undefined') {
+                    this._toggleFieldClass(validator.id, addClass);
+                }
+            }.bind(this))
+        }
 
         // Add passed custom class
         if (this.fieldErrorClass) {
+            // If this array of classes
             if (Array.isArray(this.fieldErrorClass)) {
                 this.fieldErrorClass.forEach(function (klass) {
+                    // Use first as prefix to id of type validation
                     if (isFirst) {
-                        this.el.removeClass(klass + id);
+                        targetElement[mode](klass + id);
                         isFirst = false;
                     } else {
-                        this.el.removeClass(klass);
+                        targetElement[mode](klass);
                     }
                 }.bind(this));
             } else {
-                this.el.removeClass(this.fieldErrorClass);
+                targetElement[mode](this.fieldErrorClass);
             }
         }
     };
@@ -306,8 +345,13 @@ var FieldValidate = (function () {
     self._extendValidator = function () {
         // Add values to main object
         this.registerValidator.forEach(function (validator) {
-            // Merge main object with data of validator
-            constructor.merge(self, validator);
+
+            // If there is object
+            if (typeof validator === 'object') {
+
+                // Merge main object with data of validator
+                constructor.merge(self, validator.export());
+            }
         }.bind(this));
     };
 
