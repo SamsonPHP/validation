@@ -176,7 +176,7 @@ __required__ method will be added to field instance and can be access as
 ``` new FieldValidator(...).required() ```
 and such validator can be added
 
-###And you can use alias validator
+__And you can use alias validator__
 
 There is when you need override some default values form another class validator and save it as new validator.
 
@@ -210,7 +210,22 @@ var UrlValidator = {
 
 As you can see there is only one methond in object which return new object which will be used for extending
 
-####But You should not use this validator with regExp
+
+And you have to add to register array this validator as object without creating
+
+```
+// Register all used validators
+this.registerValidator = [
+    new RequiredValidator(this),
+    new RegExpValidator(this),
+    UrlValidator
+];
+```
+And you can use it as:
+
+``` new FieldValidator(...).required().url() ```
+
+__But You should not use this validator with regExp__
 
 ##Contributing
 Feel free to fork and create pull requests at any time.
