@@ -35,7 +35,6 @@ var RequiredValidator = (function () {
              * @returns {FieldValidate}
              */
             required: function (errorMessage) {
-
                 validatorInstance.defaultRequiredMessage = errorMessage || validatorInstance.defaultRequiredMessage;
                 this.reservedValidators.push(validatorInstance.id);
                 return this;
@@ -47,9 +46,6 @@ var RequiredValidator = (function () {
      * Validate validator
      */
     self.validate = function () {
-
-        console.log('fd');
-
         if (this.field._getFieldValue() == '') {
             this.field.addError(this.id, this.defaultRequiredMessage);
             this.field.valid = false;
