@@ -77,7 +77,6 @@ var LengthValidator = (function () {
      * Validate validator
      */
     self.validate = function () {
-
         if (this.field._getFieldValue().length < this.defaultMinLength || this.field._getFieldValue().length > this.defaultMaxLength) {
             this.field.valid = false;
             this.field.addError(this.id, this.defaultLengthMessage);

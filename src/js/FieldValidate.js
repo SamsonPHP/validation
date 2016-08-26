@@ -26,7 +26,11 @@ var FieldValidate = (function () {
             new RequiredValidator(this),
             new LengthValidator(this),
             new RegExpValidator(this),
-            UrlValidator
+            UrlValidator,
+            EmailValidator,
+            new DayValidator(this),
+            new YearValidator(this),
+            TextValidator
         ];
 
         // Extend validators
