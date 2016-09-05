@@ -27,10 +27,10 @@ var FieldValidate = (function () {
             new LengthValidator(this),
             new RegExpValidator(this),
             UrlValidator,
-            EmailValidator,
+            new EmailValidator(this),
             new DayValidator(this),
             new YearValidator(this),
-            TextValidator
+            new TextValidator(this)
         ];
 
         // Extend validators
